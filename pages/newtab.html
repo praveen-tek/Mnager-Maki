@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>New Tab</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@phosphor-icons/web@latest"
+    />
+    <link rel="stylesheet" href="../styles/newtab.css" />
+  </head>
+  <body>
+    <div class="wallpaper-container" id="wallpaperContainer"></div>
+
+    <div class="content">
+      <div class="header">
+        <div class="filters" id="filters"></div>
+        <button class="settings-btn" id="settingsBtn" title="Settings">
+          <i class="ph ph-gear"></i>
+        </button>
+      </div>
+
+      <div class="main">
+        <div class="bookmarks-list" id="bookmarksList"></div>
+        <div class="empty-state" id="emptyState">
+          <i class="ph ph-book-open empty-icon"></i>
+          <div class="empty-text">No bookmarks yet</div>
+          <button class="add-bookmark-btn" id="addBookmarkBtn">
+            Add your first bookmark
+          </button>
+        </div>
+      </div>
+
+      <button class="fab" id="addBtn" title="Add bookmark">
+        <i class="ph ph-plus"></i>
+      </button>
+    </div>
+
+    <div class="modal-overlay" id="addModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>Add Bookmark</h2>
+          <button class="modal-close" id="closeAddModal">
+            <i class="ph ph-x"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">URL</label>
+            <input
+              type="text"
+              class="form-input"
+              id="urlInput"
+              placeholder="https://example.com"
+            />
+            <div class="form-error" id="urlError"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Title</label>
+            <input
+              type="text"
+              class="form-input"
+              id="titleInput"
+              placeholder="Example"
+            />
+            <div class="form-error" id="titleError"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Icon (phosphor icon name)</label>
+            <input
+              type="text"
+              class="form-input"
+              id="iconInput"
+              placeholder="github"
+            />
+            <div class="form-hint">
+              e.g., github, twitter, linkedin, default
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tags</label>
+            <div class="tag-list" id="tagList"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="cancelAddBtn">Cancel</button>
+          <button class="btn btn-primary" id="saveBookmarkBtn">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="settingsModal">
+      <div class="modal modal-large">
+        <div class="modal-header">
+          <h2>Settings</h2>
+          <button class="modal-close" id="closeSettingsModal">
+            <i class="ph ph-x"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="settings-section">
+            <h3>Wallpaper</h3>
+            <div class="wallpaper-options">
+              <div class="wallpaper-preview" id="wallpaperPreview"></div>
+              <div class="wallpaper-controls">
+                <div class="form-group">
+                  <label class="form-label">Wallpaper URL</label>
+                  <div style="display: flex; gap: 8px">
+                    <input
+                      type="text"
+                      class="form-input"
+                      id="wallpaperInput"
+                      placeholder="https://example.com/image.jpg"
+                      style="flex: 1"
+                    />
+                    <button class="btn btn-secondary" id="applyWallpaperBtn">
+                      Apply
+                    </button>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Or upload image</label>
+                  <input
+                    type="file"
+                    class="form-input"
+                    id="wallpaperUpload"
+                    accept="image/*"
+                  />
+                  <div class="form-hint">Supports: JPG, PNG, GIF, WebP</div>
+                </div>
+                <button class="btn btn-secondary" id="resetWallpaperBtn">
+                  Reset to Default
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3>Bookmarks</h3>
+            <div class="bookmarks-list" id="settingsBookmarksList"></div>
+          </div>
+
+          <div class="settings-section">
+            <h3>Data</h3>
+            <div class="data-controls">
+              <button class="btn btn-secondary" id="exportBtn">
+                Export Data
+              </button>
+              <button class="btn btn-secondary" id="importBtn">
+                Import Data
+              </button>
+              <button class="btn btn-danger" id="clearBtn">
+                Clear All Data
+              </button>
+            </div>
+            <input
+              type="file"
+              id="importFile"
+              accept=".json"
+              style="display: none"
+            />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" id="closeSettingsBtn">Done</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="../js/storage.js"></script>
+    <script src="../js/wallpaper.js"></script>
+    <script src="../js/bookmarks.js"></script>
+    <script src="../js/ui.js"></script>
+    <script src="../js/newtab.js"></script>
+  </body>
+</html>
