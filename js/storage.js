@@ -1,14 +1,14 @@
 const Storage = {
   BOOKMARKS_KEY: 'minimal_tab_bookmarks',
-  SETTINGS_KEY: 'minimal_tab_settings',
   WALLPAPER_KEY: 'minimal_tab_wallpaper',
+  GROUPS_KEY: 'minimal_tab_groups',
 
   DEFAULT_BOOKMARKS: [
-    { id: 1, title: 'GitHub', url: 'https://github.com', tags: ['dev', 'tools'] },
-    { id: 2, title: 'MDN', url: 'https://developer.mozilla.org', tags: ['dev', 'research'] },
-    { id: 3, title: 'Hacker News', url: 'https://news.ycombinator.com', tags: ['news'] },
-    { id: 4, title: 'Product Hunt', url: 'https://producthunt.com', tags: ['tools', 'design'] },
-    { id: 5, title: 'Dribbble', url: 'https://dribbble.com', tags: ['design', 'ui'] },
+    { id: 1, title: 'GitHub', url: 'https://github.com', tags: ['dev', 'tools'], group: null },
+    { id: 2, title: 'MDN', url: 'https://developer.mozilla.org', tags: ['dev', 'research'], group: null },
+    { id: 3, title: 'Hacker News', url: 'https://news.ycombinator.com', tags: ['news'], group: null },
+    { id: 4, title: 'Product Hunt', url: 'https://producthunt.com', tags: ['tools', 'design'], group: null },
+    { id: 5, title: 'Dribbble', url: 'https://dribbble.com', tags: ['design', 'ui'], group: null },
   ],
 
   DEFAULT_WALLPAPER: {
@@ -37,23 +37,46 @@ const Storage = {
   addBookmark(bookmark) {
     const bookmarks = this.getBookmarks();
     const id = bookmarks.length ? Math.max(...bookmarks.map(b => b.id)) + 1 : 1;
-    const newBookmark = { id, ...bookmark, tags: bookmark.tags || [] };
+    const newBookmark = { id, ...bookmark, tags: bookmark.tags || [], group: bookmark.group || null };
     bookmarks.push(newBookmark);
     this.saveBookmarks(bookmarks);
     return newBookmark;
   },
 
-  updateBookmark(id, updates) {
-    const bookmarks = this.getBookmarks();
-    const index = bookmarks.findIndex(b => b.id === id);
-    if (index === -1) return null;
-    bookmarks[index] = { ...bookmarks[index], ...updates };
-    this.saveBookmarks(bookmarks);
-    return bookmarks[index];
-  },
-
   deleteBookmark(id) {
     this.saveBookmarks(this.getBookmarks().filter(b => b.id !== id));
+    return true;
+  },
+
+  getGroups() {
+    try {
+      const stored = localStorage.getItem(this.GROUPS_KEY);
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  },
+
+  saveGroups(groups) {
+    try {
+      localStorage.setItem(this.GROUPS_KEY, JSON.stringify(groups));
+      return true;
+    } catch {
+      return false;
+    }
+  },
+
+  addGroup(name) {
+    const groups = this.getGroups();
+    const id = Date.now().toString();
+    groups.push({ id, name });
+    this.saveGroups(groups);
+    return { id, name };
+  },
+
+  deleteGroup(id) {
+    this.saveGroups(this.getGroups().filter(g => g.id !== id));
+    this.saveBookmarks(this.getBookmarks().map(b => b.group === id ? { ...b, group: null } : b));
     return true;
   },
 
@@ -79,6 +102,7 @@ const Storage = {
     return {
       bookmarks: this.getBookmarks(),
       wallpaper: this.getWallpaper(),
+      groups: this.getGroups(),
       exportedAt: new Date().toISOString(),
     };
   },
@@ -87,6 +111,7 @@ const Storage = {
     try {
       if (data.bookmarks) this.saveBookmarks(data.bookmarks);
       if (data.wallpaper) this.saveWallpaper(data.wallpaper);
+      if (data.groups) this.saveGroups(data.groups);
       return true;
     } catch {
       return false;
@@ -95,8 +120,8 @@ const Storage = {
 
   clearAll() {
     localStorage.removeItem(this.BOOKMARKS_KEY);
-    localStorage.removeItem(this.SETTINGS_KEY);
     localStorage.removeItem(this.WALLPAPER_KEY);
+    localStorage.removeItem(this.GROUPS_KEY);
     return true;
   },
 };

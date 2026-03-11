@@ -1,5 +1,6 @@
 let currentFilter = 'All';
 let selectedTags = [];
+let selectedGroup = null;
 
 const $ = id => document.getElementById(id);
 
@@ -14,10 +15,13 @@ const titleInput = $('titleInput');
 const urlError = $('urlError');
 const titleError = $('titleError');
 const tagList = $('tagList');
+const groupList = $('groupList');
 const wallpaperInput = $('wallpaperInput');
 const wallpaperUpload = $('wallpaperUpload');
 const wallpaperPreview = $('wallpaperPreview');
 const settingsBookmarksList = $('settingsBookmarksList');
+const groupManager = $('groupManager');
+const newGroupInput = $('newGroupInput');
 const importFile = $('importFile');
 
 function init() {
@@ -30,15 +34,17 @@ function init() {
 function renderFilters() {
   UI.renderFilters(filtersContainer, currentFilter, tag => {
     currentFilter = tag;
+    window._currentFilter = tag;
     renderFilters();
     renderBookmarks();
   });
 }
 
 function renderBookmarks() {
+  window._currentFilter = currentFilter;
   const filtered = Bookmarks.getByTag(currentFilter);
   const hasBookmarks = filtered.length > 0;
-  bookmarksList.style.display = hasBookmarks ? 'flex' : 'none';
+  bookmarksList.style.display = hasBookmarks ? 'block' : 'none';
   emptyState.style.display = hasBookmarks ? 'none' : 'flex';
   if (hasBookmarks) UI.renderBookmarks(bookmarksList, filtered, deleteBookmark);
 }
@@ -46,17 +52,22 @@ function renderBookmarks() {
 function deleteBookmark(id) {
   Bookmarks.delete(id);
   renderBookmarks();
-  UI.renderBookmarksList(settingsBookmarksList, Bookmarks.getAll(), deleteBookmark);
+  refreshSettingsLists();
   UI.showNotification('Bookmark deleted');
 }
 
 function openAddModal() {
   selectedTags = [];
+  selectedGroup = null;
   urlInput.value = '';
   titleInput.value = '';
   UI.clearError(urlError);
   UI.clearError(titleError);
   UI.renderTagOptions(tagList, selectedTags, toggleTag);
+  UI.renderGroupOptions(groupList, selectedGroup, g => {
+    selectedGroup = g;
+    UI.renderGroupOptions(groupList, selectedGroup, arguments.callee);
+  });
   UI.toggleModal(addModal, true);
   urlInput.focus();
 }
@@ -85,10 +96,10 @@ function saveBookmark() {
   if (hasError) return;
 
   try {
-    Bookmarks.add({ url, title, tags: selectedTags });
+    Bookmarks.add({ url, title, tags: selectedTags, group: selectedGroup });
     closeAddModal();
     renderBookmarks();
-    UI.renderBookmarksList(settingsBookmarksList, Bookmarks.getAll(), deleteBookmark);
+    refreshSettingsLists();
     UI.showNotification('Bookmark added');
   } catch (err) {
     UI.showError(urlError, err.message);
@@ -97,7 +108,7 @@ function saveBookmark() {
 
 function openSettingsModal() {
   updateWallpaperPreview();
-  UI.renderBookmarksList(settingsBookmarksList, Bookmarks.getAll(), deleteBookmark);
+  refreshSettingsLists();
   UI.toggleModal(settingsModal, true);
 }
 
@@ -105,14 +116,33 @@ function closeSettings() {
   UI.toggleModal(settingsModal, false);
 }
 
+function refreshSettingsLists() {
+  UI.renderBookmarksList(settingsBookmarksList, Bookmarks.getAll(), deleteBookmark);
+  UI.renderGroupManager(groupManager, deleteGroup);
+}
+
+function deleteGroup(id) {
+  Bookmarks.deleteGroup(id);
+  renderBookmarks();
+  refreshSettingsLists();
+  UI.showNotification('Group deleted');
+}
+
+function addGroup() {
+  const name = newGroupInput.value.trim();
+  if (!name) return;
+  Bookmarks.addGroup(name);
+  newGroupInput.value = '';
+  refreshSettingsLists();
+  UI.showNotification('Group added');
+}
+
 function updateWallpaperPreview() {
   const url = Wallpaper.getPreviewUrl();
   wallpaperPreview.innerHTML = '';
-  wallpaperPreview.style.backgroundImage = 'none';
   if (url) {
     const img = document.createElement('img');
     img.src = url;
-    img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
     wallpaperPreview.appendChild(img);
   }
 }
@@ -138,7 +168,7 @@ function applyWallpaperFile(file) {
       wallpaperUpload.value = '';
       UI.showNotification('Wallpaper updated');
     } else {
-      UI.showNotification('Failed to upload wallpaper');
+      UI.showNotification('Failed to upload');
     }
   });
 }
@@ -168,20 +198,21 @@ function handleImport(file) {
       Storage.importData(JSON.parse(e.target.result));
       renderFilters();
       renderBookmarks();
-      UI.renderBookmarksList(settingsBookmarksList, Bookmarks.getAll(), deleteBookmark);
+      refreshSettingsLists();
       UI.showNotification('Data imported');
     } catch {
-      UI.showNotification('Failed to import data');
+      UI.showNotification('Failed to import');
     }
   };
   reader.readAsText(file);
 }
 
 function clearAllData() {
-  if (!confirm('Delete all bookmarks and settings?')) return;
+  if (!confirm('Delete all bookmarks, groups and settings?')) return;
   Storage.clearAll();
   currentFilter = 'All';
   selectedTags = [];
+  selectedGroup = null;
   renderFilters();
   renderBookmarks();
   Wallpaper.reset();
@@ -212,6 +243,9 @@ function attachEventListeners() {
   $('importBtn').onclick = () => importFile.click();
   importFile.onchange = e => handleImport(e.target.files[0]);
   $('clearBtn').onclick = clearAllData;
+
+  $('addGroupBtn').onclick = addGroup;
+  newGroupInput.onkeypress = e => { if (e.key === 'Enter') addGroup(); };
 
   document.onkeydown = e => {
     if (e.key === 'Escape') { closeAddModal(); closeSettings(); }
