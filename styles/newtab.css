@@ -5,6 +5,7 @@
   --bookmark-spacing: 0.2px;
   --column-count: 4;
   --bookmark-padding: 7px;
+  --bookmark-transform: uppercase;
 }
 
 * {
@@ -133,8 +134,7 @@ body {
 }
 
 .settings-btn:hover {
-  background: rgba(255,255,255,0.12);
-  border-color: rgba(255,255,255,0.22);
+motion-rotation: auto;
 }
 
 /* ── MAIN CONTENT ── */
@@ -198,7 +198,7 @@ body {
   font-weight: var(--bookmark-weight);
   font-family: 'Courier New', monospace;
   letter-spacing: var(--bookmark-spacing);
-  text-transform: uppercase;
+  text-transform: var(--bookmark-transform);
   color: var(--bookmark-color);
   white-space: nowrap;
   overflow: hidden;

@@ -1,13 +1,3 @@
-// ── Constants ────────────────────────────────────────────────
-const BOOKMARKS_KEY = 'minimal_tab_bookmarks';
-const TAGS_KEY      = 'minimal_tab_tags';
-
-const DEFAULT_TAGS = [
-  'news', 'ui', 'robotics', 'open-media', 'research',
-  'tools', 'ai', 'design', 'dev', 'productivity', 'social',
-  'entertainment', 'education', 'business', 'health',
-];
-
 // ── State ─────────────────────────────────────────────────────
 let selectedTags = [];
 
@@ -15,35 +5,13 @@ let selectedTags = [];
 const urlInput    = document.getElementById('popupUrl');
 const titleInput  = document.getElementById('popupTitle');
 const tagGrid     = document.getElementById('popupTagGrid');
+const groupSelect = document.getElementById('popupGroup');
 const saveBtn     = document.getElementById('popupSaveBtn');
 const statusText  = document.getElementById('popupStatus');
 
-// ── Helpers ───────────────────────────────────────────────────
-function getStoredTags() {
-  try {
-    const raw = localStorage.getItem(TAGS_KEY);
-    return raw ? JSON.parse(raw) : [...DEFAULT_TAGS];
-  } catch {
-    return [...DEFAULT_TAGS];
-  }
-}
-
-function getStoredBookmarks() {
-  try {
-    const raw = localStorage.getItem(BOOKMARKS_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveBookmarks(bookmarks) {
-  localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(bookmarks));
-}
-
 // ── Render tag grid ───────────────────────────────────────────
 function renderTags() {
-  const tags = getStoredTags();
+  const tags = Storage.getTags();
   tagGrid.innerHTML = '';
 
   if (!tags.length) {
@@ -72,6 +40,17 @@ function renderTags() {
   });
 }
 
+// ── Render groups ─────────────────────────────────────────────
+function renderGroups() {
+  const groups = Storage.getGroups();
+  groups.forEach(group => {
+    const option = document.createElement('option');
+    option.value = group.id;
+    option.textContent = group.name;
+    groupSelect.appendChild(option);
+  });
+}
+
 // ── Show status message ───────────────────────────────────────
 function showStatus(msg, isError = false) {
   statusText.textContent = msg;
@@ -87,6 +66,7 @@ function clearStatus() {
 function saveBookmark() {
   const url   = urlInput.value.trim();
   const title = titleInput.value.trim();
+  const group = groupSelect.value || null;
 
   if (!url)   { showStatus('URL REQUIRED', true); return; }
   if (!title) { showStatus('TITLE REQUIRED', true); return; }
@@ -94,10 +74,12 @@ function saveBookmark() {
   // Basic URL validation
   try { new URL(url); } catch { showStatus('INVALID URL', true); return; }
 
-  const bookmarks = getStoredBookmarks();
-  const id = Date.now();
-  bookmarks.push({ id, title, url, tags: [...selectedTags], group: null });
-  saveBookmarks(bookmarks);
+  Storage.addBookmark({ 
+    title, 
+    url, 
+    tags: [...selectedTags], 
+    group 
+  });
 
   saveBtn.disabled = true;
   showStatus('SAVED');
@@ -105,13 +87,15 @@ function saveBookmark() {
 }
 
 // ── Pre-fill URL + Title from active tab ──────────────────────
-chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
-  if (!tab) return;
-  if (tab.url)   urlInput.value   = tab.url;
-  if (tab.title) titleInput.value = tab.title;
-  // Select title text after fill so user can immediately retype it
-  titleInput.select();
-});
+if (chrome && chrome.tabs) {
+  chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
+    if (!tab) return;
+    if (tab.url)   urlInput.value   = tab.url;
+    if (tab.title) titleInput.value = tab.title;
+    // Select title text after fill so user can immediately retype it
+    titleInput.select();
+  });
+}
 
 // ── Wire up ───────────────────────────────────────────────────
 saveBtn.addEventListener('click', saveBookmark);
@@ -130,3 +114,4 @@ document.addEventListener('keydown', e => {
 
 // ── Init ──────────────────────────────────────────────────────
 renderTags();
+renderGroups();

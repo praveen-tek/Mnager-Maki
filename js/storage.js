@@ -20,6 +20,7 @@ const Storage = {
     letterSpacing: 0.2,
     columnCount: 4,
     compactMode: false,
+    textTransform: 'uppercase',
   },
 
   DEFAULT_BOOKMARKS: [

@@ -245,6 +245,7 @@ function applyCustomize() {
   root.style.setProperty('--bookmark-spacing', c.letterSpacing + 'px');
   root.style.setProperty('--column-count', c.columnCount);
   root.style.setProperty('--bookmark-padding', c.compactMode ? '3px' : '7px');
+  root.style.setProperty('--bookmark-transform', c.textTransform || 'uppercase');
 }
 
 function saveCustomize(patch) {
@@ -270,6 +271,9 @@ function refreshCustomizePanel() {
 
   // Font weight
   setToggleActive('custFontWeight', c.fontWeight);
+
+  // Text transform
+  setToggleActive('custTextTransform', c.textTransform || 'uppercase');
 
   // Letter spacing
   const lsSlider = $('custSpacing');
@@ -403,6 +407,16 @@ function attachEventListeners() {
       saveCustomize({ fontWeight: btn.dataset.val });
     };
   });
+
+  const textTransformEl = $('custTextTransform');
+  if (textTransformEl) {
+    textTransformEl.querySelectorAll('.cust-toggle-btn').forEach(btn => {
+      btn.onclick = () => {
+        setToggleActive('custTextTransform', btn.dataset.val);
+        saveCustomize({ textTransform: btn.dataset.val });
+      };
+    });
+  }
 
   $('custSpacing').oninput = e => {
     const v = parseFloat(e.target.value);
