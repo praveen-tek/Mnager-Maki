@@ -1,4 +1,4 @@
-# Manger-Maki
+# Flock
 
 This is an AI-generated browser extension created in just 20 minutes. It has plenty of room for improvement, but after a quick setup and using it for an hour, it feels much better than a traditional bookmark manager. *I will continue to work to make it better and easier to use.*
 
