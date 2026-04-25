@@ -10,15 +10,15 @@ export default function Navbar() {
         </Link>
         
         <div className="flex items-center gap-6">
-          <Link href="#features" className="text-xs uppercase tracking-widest text-zinc-500 hover:text-black transition-colors font-light">
-            Features
+          <Link href="/legal" className="text-xs uppercase tracking-widest text-zinc-500 hover:text-black transition-colors font-light">
+            Legal
           </Link>
-          <Link href="#pricing" className="text-xs uppercase tracking-widest text-zinc-500 hover:text-black transition-colors font-light">
+          <Link href="/pricing" className="text-xs uppercase tracking-widest text-zinc-500 hover:text-black transition-colors font-light">
             Pricing
           </Link>
-          <button className="border border-black/10 text-black px-4 py-1 rounded-full text-xs hover:bg-black hover:text-white transition-all duration-300">
+          <Link href="https://github.com/praveen-tek/Manger-Maki" className="border border-black/10 text-black px-4 py-1 rounded-full text-xs hover:bg-black hover:text-white transition-all duration-300">
             Download
-          </button>
+          </Link>
         </div>
 
       </div>

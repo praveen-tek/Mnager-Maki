@@ -23,7 +23,7 @@ export default function Footer() {
           <a href="#" className="hover:text-black transition-colors" aria-label="GitHub">
             <GithubLogo size={24} weight="regular" />
           </a>
-          <a href="#" className="hover:text-black transition-colors" aria-label="Privacy">
+          <a href="/legal" className="hover:text-black transition-colors" aria-label="Privacy">
             <ShieldCheck size={24} weight="regular" />
           </a>
         </div>
