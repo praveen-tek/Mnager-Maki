@@ -20,8 +20,9 @@ jobs:
     defaults:
       run:
         working-directory: ./web
-      env:
+    env:
       GITHUB_ACTIONS: 'true'
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
